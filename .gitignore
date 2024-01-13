@@ -10,7 +10,8 @@
 # dependencies
 /node_modules
 
-
+#组件文件
+/store
 
 
 # profiling files
