@@ -4,6 +4,7 @@ const express = require('express'),
     path = require('path'),
     mongoose = require('mongoose'),
     multer = require('multer');
+const mime = require('mime-types');
 
 const hostname = '127.0.0.1',
     port = 3000;
@@ -44,12 +45,15 @@ app.all('/store/*', (req, res, next) => {
     } else if (/\.woff|woff2|ttf$/.test(pathname)) {
         // 获取pathname
         fs.readFile('./' + pathname, 'binary', (err, content) => {
-            res.setHeader('Content-Type', 'application/x-font-woff');
-            res.header('Access-Control-Allow-Origin', '*');
-            res.write(content, 'binary');
-            res.send();
+            const contentType = mime.lookup('./' + pathname);
+            console.log(contentType);
+            res.setHeader('Content-Type', contentType);
+            // res.header('Access-Control-Allow-Origin', '*');
+            // res.write(content, 'binary');
+            // res.send();
+            res.end(fs.readFileSync('./' + pathname), 'binary');
         });
-    } else if (/\.png$/.test(pathname)) {
+    } else if (/\.png|\.jpg$/.test(pathname)) {
         // 获取pathname
         fs.readFile('./' + pathname, 'binary', (err, content) => {
             res.setHeader('Content-Type', 'application/x-font-woff');
@@ -201,6 +205,25 @@ app.get('/menus', (req, res) => {
                 item.area = store + '/' + item.area;
                 return item;
             }),
+        });
+        // res.end();
+    });
+});
+const imageSchema = new mongoose.Schema({
+    id: String,
+    src: String,
+});
+const imageModel = mongoose.model('Image', imageSchema);
+// 内置图片列表
+app.get('/images', (req, res) => {
+    imageModel.find().then((list) => {
+        res.header({
+            'Access-Control-Allow-Origin': '*',
+            'Content-Type': 'application/json',
+        });
+        res.status(200).json({
+            code: 200,
+            data: list,
         });
         // res.end();
     });
