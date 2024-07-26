@@ -14,6 +14,7 @@ app.use(bodyParser.urlencoded({ extended: false, limit: '10mb' }));
 app.use(bodyParser.json({ limit: '10mb' }));
 // 获取文件
 app.all('/store/*', (req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
     const pathname = req._parsedUrl.pathname;
     if (/\.js|css$/.test(pathname)) {
         fs.readFile('./' + pathname, 'utf-8', (err, content) => {
@@ -21,6 +22,7 @@ app.all('/store/*', (req, res, next) => {
                 'Content-Type',
                 /\.js$/.test(pathname) ? 'text/javascript' : 'text/css'
             );
+            res.setHeader('Access-Control-Allow-Origin', '*');
             res.header('Access-Control-Allow-Origin', '*');
             let code;
             if (err) {
@@ -46,7 +48,6 @@ app.all('/store/*', (req, res, next) => {
         // 获取pathname
         fs.readFile('./' + pathname, 'binary', (err, content) => {
             const contentType = mime.lookup('./' + pathname);
-            console.log(contentType);
             res.setHeader('Content-Type', contentType);
             // res.header('Access-Control-Allow-Origin', '*');
             // res.write(content, 'binary');
@@ -54,13 +55,9 @@ app.all('/store/*', (req, res, next) => {
             res.end(fs.readFileSync('./' + pathname), 'binary');
         });
     } else if (/\.png|\.jpg$/.test(pathname)) {
+        console.log('接收', pathname);
         // 获取pathname
-        fs.readFile('./' + pathname, 'binary', (err, content) => {
-            res.setHeader('Content-Type', 'application/x-font-woff');
-            res.header('Access-Control-Allow-Origin', '*');
-            res.write(content, 'binary');
-            res.send();
-        });
+        res.sendFile(__dirname + '/' + pathname);
     } else {
         next();
     }
